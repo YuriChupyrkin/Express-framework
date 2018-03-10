@@ -1,4 +1,4 @@
-const TestApiController = require('./api/testApiController');
+const PeopleApiController = require('./api/peopleApiController');
 
 module.exports = class ControllersBuilder {
   constructor(routeConfig) {
@@ -10,6 +10,7 @@ module.exports = class ControllersBuilder {
   }
 
   buildAll() {
-    this.build(TestApiController);
+    console.log('controllers are building...');
+    this.build(PeopleApiController);
   }
 }

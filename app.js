@@ -4,6 +4,8 @@ const path = require('path');
 const ServerSettings = require('./serverSettings');
 const RouteConfig = require('./routeConfig');
 const ControllersBuilder = require('./controllers/controllersBuilder');
+const MongoClient = require('mongodb').MongoClient;
+const DataCollectionsBuilder = require('./DAL/dataCollectionsBuilder');
 
 const app = express();
 const routeConfig = new RouteConfig(app);
@@ -24,7 +26,28 @@ routeConfig.init();
 controllersBuilder = new ControllersBuilder(routeConfig);
 controllersBuilder.buildAll();
 
-// run server
-app.listen(ServerSettings.Port, () => {
-  console.log(`server started on ${ServerSettings.Port} port`);
-});
+const dataBaseUrl = ServerSettings.DataBaseUrl;
+const dataBaseName = ServerSettings.DataBaseName;
+
+if (dataBaseUrl && dataBaseName) {
+  MongoClient.connect(dataBaseUrl, (error, client) => {
+    if (error) {
+      return console.log(error);
+    }
+
+    const db = client.db(dataBaseName);
+
+    // build collections
+    new DataCollectionsBuilder(db).buildAll();
+
+    // run server
+    app.listen(ServerSettings.Port, () => {
+      console.log(`server started on ${ServerSettings.Port} port`);
+    });
+  });
+} else {
+  // run server
+  app.listen(ServerSettings.Port, () => {
+    console.log(`server started on ${ServerSettings.Port} port`);
+  });
+}
